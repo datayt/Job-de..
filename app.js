@@ -1,7 +1,7 @@
 // ==============================================
 // app.js - Enhanced Debugging Version
 // ==============================================
-const API_URL = "https://script.google.com/macros/s/AKfycbxgP61NtNzcQMsvcGAL4IgOMmKz3ztaEQRD7sStg4S-YvesX3taPfhl1EAK6LVCEwIfSQ/exec"; // e.g. https://script.google.com/macros/s/ABCDE/exec
+const API_URL = "https://script.google.com/macros/s/AKfycbzyEZZ1elC8UqQBmY6ZIKOOwlV5mBAKrqJxfpLYcj0kRfoPL7bbS6amYbI7K1FHm5S4NA/exec"; // e.g. https://script.google.com/macros/s/ABCDE/exec
 
 // Universal API Caller with Detailed Logging
 async function callAPI(action, data = {}) {
