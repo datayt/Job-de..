@@ -1,40 +1,51 @@
 // ==============================================
-// app.js - GitHub Frontend API Connector
-// PASTE YOUR DEPLOYED APPS SCRIPT URL BELOW:
+// app.js - Enhanced Debugging Version
 // ==============================================
-const API_URL = "https://script.google.com/macros/s/AKfycbw1GtnkgbLG6qCLgsBqL3WuObis-8odYP1LNB3-xyf_65_T_YgxavVe5_ka3us4XJedyg/exec"; 
+const API_URL = "https://script.google.com/macros/s/AKfycbxgP61NtNzcQMsvcGAL4IgOMmKz3ztaEQRD7sStg4S-YvesX3taPfhl1EAK6LVCEwIfSQ/exec"; // e.g. https://script.google.com/macros/s/ABCDE/exec
 
-// Universal API Caller
+// Universal API Caller with Detailed Logging
 async function callAPI(action, data = {}) {
   const payload = { action, ...data };
   try {
-    console.log(`Sending request to ${API_URL} with action: ${action}`); // Debug
+    console.log(`[1] Sending POST to: ${API_URL}`);
+    console.log(`[2] Payload:`, payload);
+
     const response = await fetch(API_URL, {
       method: 'POST',
-      mode: 'cors', // DO NOT use 'no-cors'. 'cors' is required to read JSON.
+      mode: 'cors',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
 
+    console.log(`[3] Response Status: ${response.status} (${response.statusText})`);
+
+    // If the server returns a 302 redirect (which means it's asking for auth), this will fail.
     if (!response.ok) {
-      throw new Error(`Server responded with HTTP ${response.status}`);
+      // Try to read error text even if status is not 200
+      const errorText = await response.text();
+      console.error(`[4] Server responded with error:`, errorText);
+      throw new Error(`Server returned HTTP ${response.status}. Check console for details.`);
     }
 
     const text = await response.text();
     if (!text) {
-      throw new Error('Server returned an empty response. Check your Apps Script logs.');
+      throw new Error('Server returned an empty response (Check Apps Script logs for crashes).');
     }
 
-    return JSON.parse(text);
+    console.log(`[5] Raw Response:`, text);
+    const json = JSON.parse(text);
+    console.log(`[6] Parsed JSON:`, json);
+    return json;
+
   } catch (error) {
-    console.error('API Call Error:', error);
-    // User-friendly alerts
+    console.error('CRITICAL API ERROR:', error);
+    
     if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-      alert('Network error. Did you paste the correct Apps Script URL? Ensure you deployed it with "Anyone" access.');
+      alert('NETWORK ERROR. \n1. Ensure you opened the Apps Script URL in your browser tab and it shows {"status":"OK"}.\n2. Ensure the deployment is set to "Execute as: Me" and "Anyone" access.\n3. If using HTTPS, ensure your GitHub page is also HTTPS.');
     } else if (error.message.includes('JSON')) {
-      alert('Server returned invalid data. Did you correctly copy the Code.gs script?');
+      alert('The server sent back HTML/Login redirect instead of JSON. This means the script is trying to ask for permissions. Set "Execute as: Me" in the Apps Script deployment settings.');
     } else {
-      alert('Connection error: ' + error.message + ' (Check console for details)');
+      alert('Error: ' + error.message);
     }
     return { success: false, error: error.message };
   }
