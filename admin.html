@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HR Admin Panel</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Mobile Hamburger -->
+  <div class="hamburger btn btn-light shadow" onclick="toggleSidebar()"><i class="fas fa-bars"></i></div>
+  <div class="overlay" onclick="toggleSidebar()"></div>
+
+  <!-- Login -->
+  <div id="login-screen">
+    <div class="login-card">
+      <h3 class="fw-bold mb-3"><i class="fas fa-shield-alt me-2"></i>Admin Login</h3>
+      <input type="text" id="adminUser" class="form-control mb-3" placeholder="Username (admin)">
+      <input type="password" id="adminPass" class="form-control mb-3" placeholder="Password (admin123)">
+      <button class="btn btn-primary w-100" onclick="adminLogin()">Login</button>
+      <div id="adminLoginError" class="text-danger mt-3" style="display:none;">Invalid credentials!</div>
+    </div>
+  </div>
+
+  <!-- Main App -->
+  <div id="main-app" class="wrapper" style="display:none;">
+    <div class="sidebar" id="sidebar">
+      <div class="brand"><i class="fas fa-building me-2"></i> HR Admin</div>
+      <button onclick="switchTab('dashboard')" id="btn-dashboard" class="active"><i class="fas fa-chart-line me-2"></i> Dashboard</button>
+      <button onclick="switchTab('employees')" id="btn-employees"><i class="fas fa-users me-2"></i> Employees</button>
+      <button onclick="switchTab('attendance')" id="btn-attendance"><i class="fas fa-calendar-check me-2"></i> Attendance</button>
+      <button onclick="switchTab('payroll')" id="btn-payroll"><i class="fas fa-file-invoice-dollar me-2"></i> Payroll</button>
+      <button onclick="adminLogout()" class="mt-auto text-danger border-top border-secondary"><i class="fas fa-sign-out-alt me-2"></i> Logout</button>
+    </div>
+
+    <div class="main-content">
+      <div id="dashboard" class="section-tab active">
+        <h2>Dashboard</h2>
+        <div class="row text-center g-4">
+          <div class="col-md-4"><div class="card-custom border-primary border-top border-4"><h5>Total Employees</h5><h2 id="dash-total">0</h2></div></div>
+          <div class="col-md-4"><div class="card-custom border-success border-top border-4"><h5>Present Today</h5><h2 id="dash-present">0</h2></div></div>
+          <div class="col-md-4"><div class="card-custom border-danger border-top border-4"><h5>Absent Today</h5><h2 id="dash-absent">0</h2></div></div>
+        </div>
+      </div>
+
+      <div id="employees" class="section-tab">
+        <h2>Manage Employees</h2>
+        <div class="card-custom">
+          <h5>Add New Employee</h5>
+          <form id="addEmpForm" onsubmit="addEmployee(event)" class="row g-3 mt-2">
+            <div class="col-md-3"><input type="text" id="empName" class="form-control" placeholder="Full Name" required></div>
+            <div class="col-md-3"><input type="email" id="empEmail" class="form-control" placeholder="Email" required></div>
+            <div class="col-md-2"><input type="number" id="empSalary" class="form-control" placeholder="Salary (₹)" required></div>
+            <div class="col-md-2"><input type="text" id="empDept" class="form-control" placeholder="Department" required></div>
+            <div class="col-md-2"><button type="submit" class="btn btn-primary w-100">Add</button></div>
+          </form>
+        </div>
+        <div class="card-custom table-responsive"><table class="table table-hover"><thead class="table-dark"><tr><th>ID</th><th>Name</th><th>Dept</th><th>Salary</th><th>ID Card</th></tr></thead><tbody id="empTableBody"></tbody></table></div>
+      </div>
+
+      <div id="attendance" class="section-tab">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+          <h2>Daily Attendance</h2>
+          <input type="date" id="attendanceDate" class="form-control w-auto" onchange="renderAttendance()">
+        </div>
+        <div class="card-custom table-responsive"><table class="table align-middle"><thead class="table-dark"><tr><th>Employee</th><th>Status</th><th>Mark</th></tr></thead><tbody id="attTableBody"></tbody></table></div>
+      </div>
+
+      <div id="payroll" class="section-tab">
+        <h2>Payroll Summary</h2>
+        <div class="card-custom table-responsive"><table class="table table-bordered"><thead class="table-dark"><tr><th>Employee</th><th>Base Salary</th><th>Days Present</th><th>Net Payable</th></tr></thead><tbody id="payTableBody"></tbody></table></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ID Card Modal -->
+  <div class="modal fade" id="idCardModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-body text-center" id="idCardContent"></div></div></div></div>
+
+  <script src="app.js"></script>
+  <script>
+    let currentAdmin = false;
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.querySelector('.overlay').classList.toggle('active'); }
+    function adminLogin() {
+      if(document.getElementById('adminUser').value === 'admin' && document.getElementById('adminPass').value === 'admin123') {
+        currentAdmin = true;
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('main-app').style.display = 'flex';
+        switchTab('dashboard');
+      } else document.getElementById('adminLoginError').style.display = 'block';
+    }
+    function adminLogout() { currentAdmin = false; document.getElementById('login-screen').style.display = 'flex'; document.getElementById('main-app').style.display = 'none'; }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.section-tab').forEach(t=>t.classList.remove('active'));
+      document.querySelectorAll('.sidebar button').forEach(b=>b.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      document.getElementById('btn-'+tabId).classList.add('active');
+      if(currentAdmin) {
+        if(tabId==='dashboard') loadDashboard();
+        if(tabId==='employees') loadEmployees();
+        if(tabId==='attendance') renderAttendance();
+        if(tabId==='payroll') loadPayroll();
+      }
+      if(window.innerWidth < 992) toggleSidebar(); // Auto-close on mobile
+    }
+
+    async function loadDashboard() {
+      const res = await callAPI('getStats');
+      if(res.success) { document.getElementById('dash-total').innerText = res.data.total;
+        document.getElementById('dash-present').innerText = res.data.present;
+        document.getElementById('dash-absent').innerText = res.data.absent; }
+    }
+
+    async function loadEmployees() {
+      const res = await callAPI('getEmployees');
+      if(res.success) {
+        const tbody = document.getElementById('empTableBody');
+        tbody.innerHTML = '';
+        res.data.forEach(e => {
+          tbody.innerHTML += `<tr>
+            <td>${e.id}</td><td>${e.name}</td><td>${e.dept}</td>
+            <td>₹${e.salary.toLocaleString()}</td>
+            <td><button class="btn btn-sm btn-outline-primary" onclick="showIdCard('${e.id}','${e.name}','${e.dept}','${e.email}')"><i class="fas fa-id-card"></i> View</button></td>
+          </tr>`;
+        });
+      }
+    }
+
+    async function addEmployee(e) {
+      e.preventDefault();
+      const name=document.getElementById('empName').value, email=document.getElementById('empEmail').value,
+            salary=document.getElementById('empSalary').value, dept=document.getElementById('empDept').value;
+      const res = await callAPI('addEmployee', {name, email, salary, dept});
+      if(res.success) { alert('Added! ID: '+res.empId); document.getElementById('addEmpForm').reset(); loadEmployees(); }
+    }
+
+    function showIdCard(id, name, dept, email) {
+      const qr = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${id}`;
+      document.getElementById('idCardContent').innerHTML = `
+        <div class="id-card">
+          <h6 class="text-primary fw-bold"><i class="fas fa-building me-2"></i>ACME CORP</h6>
+          <img src="https://ui-avatars.com/api/?name=${name.replace(' ', '+')}&background=0D8ABC&color=fff">
+          <h5 class="fw-bold mt-2">${name}</h5>
+          <p class="mb-1 text-muted"><i class="fas fa-id-badge me-2"></i>${id}</p>
+          <p class="mb-1 text-muted"><i class="fas fa-envelope me-2"></i>${email}</p>
+          <p class="mb-3 text-muted"><i class="fas fa-briefcase me-2"></i>${dept}</p>
+          <img src="${qr}" alt="QR" style="width:80px;">
+        </div>
+      `;
+      new bootstrap.Modal(document.getElementById('idCardModal')).show();
+    }
+
+    async function renderAttendance() {
+      const date = document.getElementById('attendanceDate').value;
+      const attRes = await callAPI('getAttendanceForDate', {date});
+      const empRes = await callAPI('getEmployees');
+      if(empRes.success) {
+        const tbody = document.getElementById('attTableBody');
+        tbody.innerHTML = '';
+        empRes.data.forEach(e => {
+          const status = attRes.success && attRes.data[e.id]?.status || 'Not Marked';
+          let badge = `<span class="badge bg-secondary">${status}</span>`;
+          if(status==='Present') badge='<span class="badge bg-success">Present</span>';
+          else if(status==='Half Day') badge='<span class="badge bg-warning text-dark">Half Day</span>';
+          else if(status==='Absent') badge='<span class="badge bg-danger">Absent</span>';
+          tbody.innerHTML += `<tr>
+            <td><strong>${e.name}</strong><br><small>${e.id}</small></td>
+            <td>${badge}</td>
+            <td><div class="btn-group">
+              <button class="btn btn-sm btn-present" onclick="markAttendance('${e.id}','Present','${date}')">Present</button>
+              <button class="btn btn-sm btn-halfday" onclick="markAttendance('${e.id}','Half Day','${date}')">Half</button>
+              <button class="btn btn-sm btn-absent" onclick="markAttendance('${e.id}','Absent','${date}')">Absent</button>
+            </div></td>
+          </tr>`;
+        });
+      }
+    }
+
+    async function markAttendance(empId, status, date) {
+      await callAPI('markAttendance', {empId, status, note: '', date});
+      renderAttendance();
+    }
+
+    async function loadPayroll() {
+      const res = await callAPI('getPayroll');
+      if(res.success) {
+        const tbody = document.getElementById('payTableBody');
+        tbody.innerHTML = '';
+        res.data.forEach(e => {
+          tbody.innerHTML += `<tr>
+            <td><strong>${e.name}</strong><br><small>${e.id}</small></td>
+            <td>₹${e.salary.toLocaleString()}</td>
+            <td>${e.days} Days</td>
+            <td class="text-success fw-bold">₹${e.net.toLocaleString()}</td>
+          </tr>`;
+        });
+      }
+    }
+    document.getElementById('attendanceDate').valueAsDate = new Date();
+  </script>
+</body>
+</html>
