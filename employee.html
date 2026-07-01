@@ -155,6 +155,7 @@
 
     async function markAtt(status) {
       const now = new Date(); const mins = now.getHours()*60 + now.getMinutes();
+      // Time check logic (9:30 AM to 11:30 AM)
       if(mins < 570 || mins > 690) { document.getElementById('attMsg').style.display = 'block'; return; }
       const id = document.getElementById('sidebar-id').innerText.replace('ID: ', '');
       const note = document.getElementById('dailyNote').value;
@@ -162,6 +163,7 @@
       await callAPI('markAttendance', { empId: id, status, note, date });
       alert('Marked as ' + status); document.getElementById('dailyNote').value = ''; checkToday(); loadMyAttendance();
     }
+    
     function saveNote() { const n=document.getElementById('dailyNote').value; if(n.trim()==='') return alert('Write a note.'); alert('Note saved.'); document.getElementById('dailyNote').value=''; }
 
     async function loadMyAttendance() {
