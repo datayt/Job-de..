@@ -3,7 +3,7 @@
 // ==============================================
 
 // REPLACE THIS WITH YOUR NEW GOOGLE APPS SCRIPT WEB APP URL
-const API_URL = "https://script.google.com/macros/s/AKfycbxVBDLqk0WGrfZidDOmcuXT0KrK3KRQVOh0e9BZfmruvBVBjslw30ZfXKu8AqT_hogPmw/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwOv2lLeeMmlPayv301F3RLkSfXBcL8aa98X2VqPWC3FaWqOaa2Q93c7RnC9BDkJoRq/exec";
 
 async function callAPI(action, data = {}) {
   const payload = { action, ...data };
