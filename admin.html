@@ -9,11 +9,9 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Mobile Hamburger -->
   <div class="hamburger btn btn-light shadow" onclick="toggleSidebar()"><i class="fas fa-bars"></i></div>
   <div class="overlay" onclick="toggleSidebar()"></div>
 
-  <!-- Login -->
   <div id="login-screen">
     <div class="login-card">
       <h3 class="fw-bold mb-3"><i class="fas fa-shield-alt me-2"></i>Admin Login</h3>
@@ -24,7 +22,6 @@
     </div>
   </div>
 
-  <!-- Main App -->
   <div id="main-app" class="wrapper" style="display:none;">
     <div class="sidebar" id="sidebar">
       <div class="brand"><i class="fas fa-building me-2"></i> HR Admin</div>
@@ -75,13 +72,13 @@
     </div>
   </div>
 
-  <!-- ID Card Modal -->
   <div class="modal fade" id="idCardModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-body text-center" id="idCardContent"></div></div></div></div>
 
   <script src="app.js"></script>
   <script>
     let currentAdmin = false;
     function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.querySelector('.overlay').classList.toggle('active'); }
+    
     function adminLogin() {
       if(document.getElementById('adminUser').value === 'admin' && document.getElementById('adminPass').value === 'admin123') {
         currentAdmin = true;
@@ -90,6 +87,7 @@
         switchTab('dashboard');
       } else document.getElementById('adminLoginError').style.display = 'block';
     }
+    
     function adminLogout() { currentAdmin = false; document.getElementById('login-screen').style.display = 'flex'; document.getElementById('main-app').style.display = 'none'; }
 
     function switchTab(tabId) {
@@ -103,14 +101,16 @@
         if(tabId==='attendance') renderAttendance();
         if(tabId==='payroll') loadPayroll();
       }
-      if(window.innerWidth < 992) toggleSidebar(); // Auto-close on mobile
+      if(window.innerWidth < 992) toggleSidebar(); 
     }
 
     async function loadDashboard() {
       const res = await callAPI('getStats');
-      if(res.success) { document.getElementById('dash-total').innerText = res.data.total;
+      if(res.success) { 
+        document.getElementById('dash-total').innerText = res.data.total;
         document.getElementById('dash-present').innerText = res.data.present;
-        document.getElementById('dash-absent').innerText = res.data.absent; }
+        document.getElementById('dash-absent').innerText = res.data.absent; 
+      }
     }
 
     async function loadEmployees() {
